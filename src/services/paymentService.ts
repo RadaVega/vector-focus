@@ -1,58 +1,79 @@
-import { PaymentRequest, PaymentResponse, OrderStatus } from '../types/payment';
-import { getOrderById, updateOrderStatus } from '../db/database';
-import { charge } from '../integrations/paymentGateway';
+import { PaymentGateway, PaymentRequest, PaymentResult } from '../types/payment';
+import { SberbankGateway } from '../integrations/sberbankGateway';
+import { z } from 'zod'; // Импорт Zod
+
+// Схема валидации для входящих данных платежа
+const PaymentRequestSchema = z.object({
+  amount: z.number().min(1).max(10000).positive(),
+  currency: z.enum(['RUB', 'USD', 'EUR']).default('RUB'),
+  paymentToken: z.string().min(10).max(100),
+});
 
 /**
- * Имитирует отправку email.
+ * Сервис, отвечающий за оркестровку бизнес-логики платежа.
+ * Теперь принимает любой объект, реализующий PaymentGateway.
  */
-async function sendConfirmationEmail(email: string, orderId: string, amount: number): Promise<void> {
-    console.log(`[EMAIL] Уведомление отправлено на ${email} об оплате ${amount}.`);
-}
+export class PaymentService {
+  private readonly gateway: PaymentGateway;
+  /**
+   * Конструктор принимает конкретный шлюз (Strategy).
+   * @param gateway Экземпляр платежного шлюза.
+   */
+  constructor(gateway: PaymentGateway) {
+    this.gateway = gateway;
+  }
 
-/**
- * Основная функция обработки платежа.
- * @param request - Запрос на оплату.
- * @returns Promise<PaymentResponse> - Результат транзакции.
- */
-export async function processPayment(request: PaymentRequest): Promise<PaymentResponse> {
-    console.log(`\n--- [START] Обработка платежа для заказа ${request.orderId} ---`);
-
-    // 1. Проверка данных (Валидация)
-    const order = await getOrderById(request.orderId);
-    if (!order || order.status !== 'CREATED') {
-        return { success: false, message: `Заказ ${request.orderId} не найден или не готов к оплате. Текущий статус: ${order?.status || 'UNKNOWN'}.`, newOrderStatus: order ? order.status : 'FAILED' };
-    }
-
-    // 2. Вызов внешнего платежного шлюза
-    let gatewayResult: { success: boolean, transactionId: string, message: string };
+  /**
+   * Основная бизнес-логика: Заказ -> Оплата -> Обновление статуса.
+   * @param orderId ID заказа.
+   * @param request Данные платежа.
+   */
+  async processOrderPayment(orderId: string, request: any): Promise<{ success: boolean; message: string }> {
     try {
-        gatewayResult = await charge(request);
+      // 1. ВАЛИДАЦИЯ ВХОДНЫХ ДАННЫХ (КРИТИЧЕСКИ ВАЖНО)
+      const validatedRequest = PaymentRequestSchema.safeParse(request);
+      if (!validatedRequest.success) {
+        return { success: false, message: `Ошибка валидации данных: ${validatedRequest.error.issues.map(i => i.message).join(', ')}` };
+      }
+      const validatedData: PaymentRequest = validatedRequest.data;
+
+      // 2. Получение заказа (OrderService)
+      const order = await this.getOrderById(orderId);
+      if (!order) {
+        return { success: false, message: 'Заказ не найден.' };
+      }
+
+      // 3. Выполнение платежа через внедренный шлюз (Strategy)
+      const paymentResult: PaymentResult = await this.gateway.processPayment(validatedData);
+      if (!paymentResult.success) {
+        return { success: false, message: `Ошибка платежа: ${paymentResult.message}` };
+      }
+      // 4. Обновление статуса и отправка уведомления
+      await this.updateOrderStatus(orderId, 'PAID');
+      await this.sendConfirmationEmail(order);
+
+      return { success: true, message: `Успешно! Заказ ${orderId} оплачен. ${paymentResult.message}` };
+
     } catch (error) {
-        console.error("Критическая ошибка интеграции:", error);
-        return { success: false, message: "Внутренняя ошибка при связи с платежной системой.", newOrderStatus: 'FAILED' };
+      console.error("Критическая ошибка при обработке платежа:", error);
+      return { success: false, message: 'Произошла внутренняя ошибка системы. Попробуйте позже.' };
     }
+  }
 
-    // 3. Обработка ответа и обновление БД
-    if (gatewayResult.success) {
-        await updateOrderStatus(request.orderId, 'PAID', gatewayResult.transactionId);
-        
-        // 4. Отправка уведомлений
-        await sendConfirmationEmail(request.buyerEmail, request.orderId, request.amount);
+  // --- Имитация зависимых методов ---
+  private async getOrderById(orderId: string): Promise<{ id: string; total: number; status: string }> {
+    // Здесь должна быть реальная логика запроса к БД
+    return { id: orderId, total: 1000, status: 'PENDING' };
+  }
 
-        return { 
-            success: true, 
-            message: "Платеж успешно обработан.", 
-            transactionId: gatewayResult.transactionId, 
-            newOrderStatus: 'PAID' 
-        };
-    } else {
-        // Если платеж не удался, обновляем статус на FAILED
-        await updateOrderStatus(request.orderId, 'FAILED');
-        return { 
-            success: false, 
-            message: `Ошибка оплаты: ${gatewayResult.message}. Пожалуйста, проверьте данные или попробуйте позже.`, 
-            newOrderStatus: 'FAILED' 
-        };
-    }
+  private async updateOrderStatus(orderId: string, status: 'PAID' | 'FAILED'): Promise<void> {
+    // Здесь должна быть реальная логика обновления статуса в БД
+    console.log(`[DB] Обновление статуса заказа ${orderId} на ${status}`);
+  }
+
+  private async sendConfirmationEmail(order: any): Promise<void> {
+    // Здесь должна быть логика отправки email
+    console.log(`[Email] Отправка подтверждения заказа ${order.id}`);
+  }
 }
-}
+
