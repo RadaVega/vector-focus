@@ -149,7 +149,7 @@ const HomePage: React.FC = () => {
             <ContactSection />
             
             {/* Стилизация для имитации Tailwind/CSS */}
-            <style jsx global>{`
+            <style>{`
                 /* Общие стили для всех секций */
                 .section { 
                     padding: 80px 20px;

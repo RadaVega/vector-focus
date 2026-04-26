@@ -1,25 +1,38 @@
-/**
- * Тип данных, отправляемых с Frontend на Backend.
- */
+// Payment types for the application
 export interface PaymentRequest {
-    orderId: string;          // ID заказа, который оплачивается
-    buyerEmail: string;       // Email покупателя для уведомления
-    amount: number;           // Сумма платежа (в копейках или центах)
-    paymentToken: string;     // Токен, полученный от платежной системы
-    paymentMethod: 'card' | 'sberbank' | 'other'; // Способ оплаты
+  orderId: string;
+  buyerEmail: string;
+  amount: number;
+  paymentToken: string;
+  paymentMethod: 'card' | 'sberbank' | 'other';
 }
 
-/**
- * Тип данных, возвращаемых Backend на Frontend.
- */
 export interface PaymentResponse {
-    success: boolean;
-    message: string;
-    transactionId?: string; // Уникальный ID транзакции
-    newOrderStatus: 'PENDING' | 'PAID' | 'FAILED'; // Новый статус заказа
+  success: boolean;
+  message: string;
+  transactionId?: string;
+  newOrderStatus: 'PENDING' | 'PAID' | 'FAILED';
 }
 
-/**
- * Статусы заказа в системе.
- */
 export type OrderStatus = 'CREATED' | 'PENDING' | 'PAID' | 'CANCELLED' | 'FAILED';
+
+export interface PaymentGateway {
+  processPayment(request: PaymentRequest): Promise<PaymentResult>;
+}
+
+export interface PaymentResult {
+  success: boolean;
+  message: string;
+  transactionId?: string;
+}
+
+// Additional types if needed
+export interface TransactionData {
+  transactionId: string;
+  amount: number;
+  currency: string;
+  timestamp: Date;
+  status: 'SUCCESS' | 'FAILED' | 'PENDING';
+}
+
+export type PaymentStatus = 'SUCCESS' | 'FAILED' | 'PENDING';
