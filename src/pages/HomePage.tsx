@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Rocket, Shield, CreditCard, ArrowRight, CheckCircle, Zap } from 'lucide-react';
 
@@ -9,14 +10,6 @@ const HomePage: React.FC = () => {
     { icon: <Zap className="w-8 h-8 text-yellow-600" />, title: 'Мгновенный деплой', description: 'Push в GitHub → авто-деплой на Vercel за секунды' },
     { icon: <CreditCard className="w-8 h-8 text-purple-600" />, title: 'Несколько шлюзов', description: 'Поддержка Сбербанка, ЮKassa, CloudPayments и других' }
   ];
-
-  const handleDemoClick = () => {
-    alert('Страница "Тест-драйв" будет доступна в ближайшее время.');
-  };
-
-  const handleDocsClick = () => {
-    alert('Страница документации будет доступна в ближайшее время.');
-  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50">
@@ -34,18 +27,18 @@ const HomePage: React.FC = () => {
             Современная оркестрация платежей для российского бизнеса. Единый API для интеграции со Сбербанком, ЮKassa и другими платёжными системами.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button
-              onClick={handleDemoClick}
+            <Link
+              to="/demo"
               className="inline-flex items-center px-8 py-3 text-lg font-semibold text-white bg-blue-600 rounded-full hover:bg-blue-700 transition shadow-lg transform hover:scale-105"
             >
               Начать тест-драйв <ArrowRight className="ml-2 w-5 h-5" />
-            </button>
-            <button
-              onClick={handleDocsClick}
+            </Link>
+            <Link
+              to="/docs"
               className="inline-flex items-center px-8 py-3 text-lg font-semibold text-gray-700 bg-white rounded-full border border-gray-300 hover:border-blue-600 transition shadow-md hover:shadow-xl"
             >
               Документация
-            </button>
+            </Link>
           </div>
         </motion.div>
       </section>
