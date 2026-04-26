@@ -10,6 +10,14 @@ const HomePage: React.FC = () => {
     { icon: <CreditCard className="w-8 h-8 text-purple-600" />, title: 'Несколько шлюзов', description: 'Поддержка Сбербанка, ЮKassa, CloudPayments и других' }
   ];
 
+  const handleDemoClick = () => {
+    alert('Страница "Тест-драйв" будет доступна в ближайшее время.');
+  };
+
+  const handleDocsClick = () => {
+    alert('Страница документации будет доступна в ближайшее время.');
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50">
       {/* Hero Section */}
@@ -26,12 +34,18 @@ const HomePage: React.FC = () => {
             Современная оркестрация платежей для российского бизнеса. Единый API для интеграции со Сбербанком, ЮKassa и другими платёжными системами.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a href="#" className="inline-flex items-center px-8 py-3 text-lg font-semibold text-white bg-blue-600 rounded-full hover:bg-blue-700 transition shadow-lg transform hover:scale-105">
+            <button
+              onClick={handleDemoClick}
+              className="inline-flex items-center px-8 py-3 text-lg font-semibold text-white bg-blue-600 rounded-full hover:bg-blue-700 transition shadow-lg transform hover:scale-105"
+            >
               Начать тест-драйв <ArrowRight className="ml-2 w-5 h-5" />
-            </a>
-            <a href="#" className="inline-flex items-center px-8 py-3 text-lg font-semibold text-gray-700 bg-white rounded-full border border-gray-300 hover:border-blue-600 transition shadow-md hover:shadow-xl">
+            </button>
+            <button
+              onClick={handleDocsClick}
+              className="inline-flex items-center px-8 py-3 text-lg font-semibold text-gray-700 bg-white rounded-full border border-gray-300 hover:border-blue-600 transition shadow-md hover:shadow-xl"
+            >
               Документация
-            </a>
+            </button>
           </div>
         </motion.div>
       </section>
@@ -59,7 +73,7 @@ const HomePage: React.FC = () => {
         <h2 className="text-4xl font-bold mb-4">Готово к работе</h2>
         <p className="text-xl text-gray-700 mb-8">Полная интеграция с тестовой средой Сбербанка. Начните приём платежей уже сегодня.</p>
         <div className="bg-white rounded-2xl p-6 shadow-xl inline-block">
-          <div className="flex items-center gap-3"><CheckCircle className="w-6 h-6 text-green-600" /><span>Тестовые учетные данные включены</span></div>
+          <div className="flex items-center gap-3"><CheckCircle className="w-6 h-6 text-green-600" /><span>Тестовые учётные данные включены</span></div>
         </div>
       </section>
 
