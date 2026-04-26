@@ -25,3 +25,5 @@ export async function charge(request: PaymentRequest): Promise<{ success: boolea
         message: 'Платеж успешно проведен.' 
     };
 }
+
+
