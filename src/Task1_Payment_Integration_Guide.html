@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Техническая инструкция: Интеграция онлайн-оплаты</title>
+    <style>
+        /* Общие стили для имитации корпоративного дизайна */
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            line-height: 1.7; 
+            color: #333; 
+            max-width: 950px; 
+            margin: 40px auto; 
+            padding: 30px; 
+            background-color: #ffffff;
+        }
+        h1 { 
+            color: #0056b3; 
+            border-bottom: 3px solid #0056b3; 
+            padding-bottom: 10px; 
+            margin-bottom: 30px; 
+            font-size: 2.2em;
+        }
+        h2 { 
+            color: #28a745; 
+            margin-top: 40px; 
+            padding-bottom: 5px; 
+            border-bottom: 1px solid #eee;
+            font-size: 1.8em;
+        }
+        h3 { 
+            color: #0056b3; 
+            margin-top: 25px; 
+            font-size: 1.4em;
+        }
+        .step { 
+            background-color: #f8f9fa; 
+            padding: 25px; 
+            border-radius: 8px; 
+            margin-bottom: 30px; 
+            border-left: 5px solid #0056b3; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .step p strong { color: #333; }
+        ul { list-style-type: none; padding-left: 0; }
+        ul li { margin-bottom: 10px; padding-left: 20px; position: relative; }
+        ul li::before {
+            content: '•';
+            color: #28a745;
+            font-weight: bold;
+            display: inline-block; 
+            width: 1em;
+            margin-left: -1em;
+        }
+        .code-block { 
+            background-color: #e9ecef; 
+            padding: 15px; 
+            border-radius: 6px; 
+            overflow-x: auto; 
+            font-family: 'Consolas', 'Courier New', monospace; 
+            font-size: 0.9em;
+            white-space: pre-wrap;
+        }
+        .key-term {
+            background-color: #fff3cd;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: bold;
+            color: #856404;
+        }
+        .success-box {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Техническая инструкция: Интеграция онлайн-оплаты</h1>
+    <p><strong>Цель:</strong> Обеспечить безопасный, надежный и масштабируемый процесс оплаты на интернет-магазине, минимизируя риски и повышая конверсию.</p>
+    <p><strong>Целевая аудитория:</strong> Backend и Frontend разработчики.</p>
+
+    <h2 style="color: #0056b3;">⚙️ Шаг 1: Выбор и настройка платежной системы</h2>
+    <div class="step">
+        <p><strong>Действия:</strong></p>
+        <ol>
+            <li><strong>Выбор провайдера:</strong> Выбор платежной системы (Stripe, ЮKassa, СберAPI и т.д.) на основе требований к регионам, валютам и типу бизнеса.</li>
+            <li><strong>Получение ключей:</strong> Регистрация аккаунта и получение необходимых ключей: <span class="key-term">API Key (Secret)</span> и <span class="key-term">Merchant ID</span>.</li>
+            <li><strong>Тестирование:</strong> Использование <span class="key-term">тестового режима (Sandbox)</span> для всех интеграционных тестов.</li>
+        </ol>
+        <p><strong>Требуемые данные:</strong> <code class="code-block">API_KEY</code>, <code class="code-block">MERCHANT_ID</code>, <code class="code-block">WEBHOOK_URL</code> (адрес, куда платежная система будет отправлять уведомления об успехе/провале).</p>
+    </div>
+
+    <h2 style="color: #0056b3;">🖥️ Шаг 2: Frontend — Создание формы оплаты</h2>
+    <div class="step">
+        <p><strong>Цель:</strong> Сбор всех данных покупателя и безопасная токенизация платежных данных.</p>
+        <p><strong>Технологии:</strong> React/Next.js, виджеты платежной системы (например, Stripe Elements).</p>
+        <p><strong>Элементы формы:</strong></p>
+        <ul>
+            <li><strong>Данные заказа:</strong> ID заказа, Сумма (получены из контекста/роута).</li>
+            <li><strong>Данные покупателя:</strong> Email, Имя, Телефон.</li>
+            <li><strong>Платежные данные:</strong> Поле для ввода карты. <strong>Важно:</strong> Данные карты никогда не должны обрабатываться на нашем сервере, только через виджет платежной системы.</li>
+        </ul>
+        <p><strong>Логика:</strong> При клике на "Оплатить" происходит вызов функции, которая отправляет данные на наш <span class="key-term">Backend API</span>, передавая только <span class="key-term">токен</span> платежа.</p>
+    </div>
+
+    <h2 style="color: #0056b3;">⚙️ Шаг 3: Backend — Обработка запроса и создание платежа</h2>
+    <div class="step">
+        <p><strong>Эндпоинт:</strong> <code class="code-block">POST /api/payment/process</code></p>
+        <p><strong>Входящие данные (Payload):</strong></p>
+        <div class="code-block">
+            {
+    "orderId": "ORD-12345",
+    "amount": 15000,
+    "token": "mock_token_xyz",
+    "buyerEmail": "user@example.com"
+}
+        </div>
+        <p><strong>Логика Backend (Пошаговый алгоритм):</strong></p>
+        <ol>
+            <li><strong>Валидация:</strong> Проверить существование заказа и его статус (должен быть <span class="key-term">CREATED</span>).</li>
+            <li><strong>Вызов Gateway:</strong> Вызвать API платежной системы с полученным токеном и суммой.</li>
+            <li><strong>Обработка ответа:</strong> Если платеж успешен, получить <span class="key-term">Transaction ID</span>.</li>
+            <li><strong>Обновление БД:</strong> Обновить статус заказа в базе данных на <span class="key-term">PAID</span> и записать <span class="key-term">Transaction ID</span>.</li>
+        </ol>
+    </div>
+
+    <h2 style="color: #0056b3;">🔄 Шаг 4: Обработка ответов и уведомления</h2>
+    <div class="step">
+        <p><strong>Сценарий 1: Успех (Success)</strong></p>
+        <ul>
+            <li><strong>Backend:</strong> Обновление статуса на <span class="key-term">PAID</span>.</li>
+            <li><strong>Backend:</strong> Отправка уведомления в CRM/ERP.</li>
+            <li><strong>Frontend:</strong> Получение ответа <code class="code-block">{success: true, transactionId: ...}</code>. Отображение зеленого сообщения об успехе.</li>
+            <li><strong>Пользователь:</strong> Получает подтверждение на email.</li>
+        </ul>
+        <p><strong>Сценарий 2: Провал (Failure)</strong></p>
+        <ul>
+            <li><strong>Backend:</strong> Обновление статуса на <span class="key-term">FAILED</span>.</li>
+            <li><strong>Frontend:</strong> Получение ответа <code class="code-block">{success: false, message: "Недостаточно средств"}</code>. Отображение красного сообщения с причиной.</li>
+        </ul>
+    </div>
+
+    <h2 style="color: #0056b3;">✨ Заключение</h2>
+    <div class="success-box">
+        <p>Благодаря модульному подходу, мы отделили бизнес-логику (<code class="code-block">paymentService</code>) от UI и внешних интеграций (<code class="code-block">paymentGateway</code>), что обеспечивает высокую тестируемость, надежность и простоту масштабирования системы.</p>
+    </div>
+</body>
+</html>
+```
