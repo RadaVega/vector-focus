@@ -44,7 +44,29 @@ export class PaymentService {
   }
 }
 
+// Improved mock payment processor with realistic success/failure based on token
 export const processPayment = async (paymentData: any) => {
   console.log("processPayment called:", paymentData);
-  return { success: true, message: "Payment successful (mock)" };
+  
+  // Simulate network delay
+  await new Promise(resolve => setTimeout(resolve, 800));
+  
+  const token = paymentData.paymentToken?.toLowerCase() || "";
+  
+  if (token.includes("success") || token.includes("test")) {
+    return {
+      success: true,
+      message: `Платёж на сумму ${paymentData.amount} ₽ успешно проведён. ID транзакции: ${Date.now()}`
+    };
+  } else if (token.includes("fail") || token.includes("error")) {
+    return {
+      success: false,
+      message: "Ошибка платежа: недостаточно средств или неверный токен."
+    };
+  } else {
+    return {
+      success: false,
+      message: "Неизвестная ошибка. Попробуйте другой тестовый токен (например, 'success_token')."
+    };
+  }
 };
