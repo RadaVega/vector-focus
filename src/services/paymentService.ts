@@ -1,3 +1,7 @@
+// ─────────────────────────────────────────────────────────────
+// 🚧 FULL PAYMENT SERVICE (commented out – will be enabled later)
+// ─────────────────────────────────────────────────────────────
+/*
 import { PaymentGateway, PaymentRequest, PaymentResult } from '../types/payment';
 import { SberbankGateway } from '../integrations/sberbankGateway';
 import { z } from 'zod';
@@ -19,7 +23,6 @@ export class PaymentService {
       if (!validatedRequest.success) {
         return { success: false, message: `Validation error: ${validatedRequest.error.message}` };
       }
-      // Construct full PaymentRequest
       const fullRequest: PaymentRequest = {
         orderId: orderId,
         buyerEmail: request.buyerEmail || 'customer@example.com',
@@ -43,30 +46,33 @@ export class PaymentService {
     console.log(`Email sent for order ${order.id}`);
   }
 }
+*/
 
-// Improved mock payment processor with realistic success/failure based on token
+// ─────────────────────────────────────────────────────────────
+// ✅ CURRENT ACTIVE MOCK – used by /demo page
+// ─────────────────────────────────────────────────────────────
 export const processPayment = async (paymentData: any) => {
   console.log("processPayment called:", paymentData);
-  
+
   // Simulate network delay
-  await new Promise(resolve => setTimeout(resolve, 800));
-  
+  await new Promise((resolve) => setTimeout(resolve, 800));
+
   const token = paymentData.paymentToken?.toLowerCase() || "";
-  
+
   if (token.includes("success") || token.includes("test")) {
     return {
       success: true,
-      message: `Платёж на сумму ${paymentData.amount} ₽ успешно проведён. ID транзакции: ${Date.now()}`
+      message: `Платёж на сумму ${paymentData.amount} ₽ успешно проведён. ID транзакции: ${Date.now()}`,
     };
   } else if (token.includes("fail") || token.includes("error")) {
     return {
       success: false,
-      message: "Ошибка платежа: недостаточно средств или неверный токен."
+      message: "Ошибка платежа: недостаточно средств или неверный токен.",
     };
   } else {
     return {
       success: false,
-      message: "Неизвестная ошибка. Попробуйте другой тестовый токен (например, 'success_token')."
+      message: "Неизвестная ошибка. Попробуйте другой тестовый токен (например, 'success_token').",
     };
   }
 };

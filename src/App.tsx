@@ -1,8 +1,8 @@
-import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import HomePage from './pages/HomePage';
-import DemoPage from './pages/DemoPage';
-import DocsPage from './pages/DocsPage';
+import React from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import HomePage from "./pages/HomePage";
+import DemoPage from "./pages/DemoPage";
+import PaymentGuide from "./pages/PaymentGuide";
 
 function App() {
   return (
@@ -10,7 +10,7 @@ function App() {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/demo" element={<DemoPage />} />
-        <Route path="/docs" element={<DocsPage />} />
+        <Route path="/docs" element={<PaymentGuide />} />
       </Routes>
     </BrowserRouter>
   );
