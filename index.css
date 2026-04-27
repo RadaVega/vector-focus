@@ -7,4 +7,7 @@
   .custom-shadow {
     box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
   }
+  .animation-delay-2000 {
+  animation-delay: 2s;
+}
 }

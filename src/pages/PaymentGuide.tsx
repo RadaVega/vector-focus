@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, ReactNode } from "react";
+import { Link } from "react-router-dom";
 
 // ─── DESIGN TOKENS ───────────────────────────────────────────────
 const T = {
@@ -18,7 +19,6 @@ const T = {
   text:   "#CDD6F4",
   white:  "#FFFFFF",
 } as const;
-
 
 // ─── FONTS (injected once) ────────────────────────────────────────
 const GlobalStyles = () => {
@@ -139,7 +139,7 @@ const FlowArrow = ({ active, color }: FlowArrowProps) => (
   </div>
 );
 
-// ─── STEP DATA TYPES ──────────────────────────────────────────────
+// ─── STEP DATA ────────────────────────────────────────────────────
 interface Provider {
   name: string;
   fee: string;
@@ -173,8 +173,8 @@ const STEPS: Step[] = [
     summary: "Выбираем ЮKassa — поддерживает 54-ФЗ, работает в России, есть SDK для Node.js/Python/PHP. Ключи хранятся ТОЛЬКО в .env на сервере. Никогда не в коде!",
     providers: [
       { name: "ЮKassa", fee: "2.8–3.5%", fz: "✓", best: "Рос. магазины" },
-      { name: "Tinkoff Pay", fee: "2.5–3%", fz: "✓", best: "Клиенты Tinkoff" },
-      { name: "Stripe", fee: "1.4–2.9%", fz: "✗", best: "Международные" },
+      { name: "Т-Банк (Tinkoff)", fee: "2.5–3%", fz: "✓", best: "Клиенты Т-Банка" },
+      { name: "Сбербанк", fee: "2.5–3%", fz: "✓", best: "Крупный бизнес" },
     ],
     code: `// .env — ТОЛЬКО на сервере, никогда в Git!
 YUKASSA_SHOP_ID=123456
@@ -401,7 +401,6 @@ const PaymentGuide: React.FC = () => {
         position: "relative",
         overflow: "hidden",
       }}>
-
         {/* GRID NOISE BACKGROUND */}
         <div style={{
           position: "fixed", inset: 0, pointerEvents: "none", zIndex: 0,
@@ -411,13 +410,11 @@ const PaymentGuide: React.FC = () => {
           backgroundSize: "40px 40px",
           opacity: 0.4,
         }} />
-
         {/* GLOW ORBS */}
         <div style={{ position:"fixed", top:"-20vh", left:"-10vw", width:"50vw", height:"50vw", borderRadius:"50%", background:`radial-gradient(circle, ${T.teal}08, transparent 70%)`, pointerEvents:"none", zIndex:0 }} />
         <div style={{ position:"fixed", bottom:"-10vh", right:"-10vw", width:"40vw", height:"40vw", borderRadius:"50%", background:`radial-gradient(circle, ${T.blue}08, transparent 70%)`, pointerEvents:"none", zIndex:0 }} />
 
         <div style={{ position: "relative", zIndex: 1, maxWidth: 1100, margin: "0 auto", padding: "0 24px 60px" }}>
-
           {/* HERO HEADER */}
           <div style={{ textAlign: "center", padding: "60px 0 48px", animation: "fadeUp 0.6s ease both" }}>
             <div style={{
@@ -440,15 +437,43 @@ const PaymentGuide: React.FC = () => {
                 WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
               }}>онлайн-оплаты</span>
             </h1>
-            <p style={{ fontSize: 17, color: T.mid, maxWidth: 520, margin: "0 auto", lineHeight: 1.6, fontWeight: 300 }}>
+            <p style={{ fontSize: 17, color: T.mid, maxWidth: 520, margin: "0 auto 24px", lineHeight: 1.6, fontWeight: 300 }}>
               Техническая инструкция для разработчиков ·{" "}
               <span style={{ color: T.teal }}>ЮKassa API</span> ·{" "}
               <span style={{ color: "#A78BFA" }}>React</span> ·{" "}
               <span style={{ color: T.blue }}>Node.js</span>
             </p>
+            {/* HOME BUTTON */}
+            <Link
+              to="/"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 8,
+                padding: "8px 20px",
+                borderRadius: 30,
+                background: T.tealD,
+                color: T.teal,
+                textDecoration: "none",
+                fontSize: 12,
+                fontFamily: "'JetBrains Mono', monospace",
+                border: `1px solid ${T.teal}30`,
+                transition: "all 0.2s",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = T.teal + "20";
+                e.currentTarget.style.borderColor = T.teal;
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = T.tealD;
+                e.currentTarget.style.borderColor = `${T.teal}30`;
+              }}
+            >
+              ← На главную
+            </Link>
           </div>
 
-          {/* FLOW SIMULATOR */}
+          {/* FLOW SIMULATOR (unchanged) */}
           <div style={{
             border: `1px solid ${T.border}`, borderRadius: 16, overflow: "hidden",
             marginBottom: 32, animation: "fadeUp 0.6s ease 0.15s both",
@@ -498,12 +523,12 @@ const PaymentGuide: React.FC = () => {
             </div>
           </div>
 
-          {/* STEP NAVIGATOR */}
+          {/* STEP NAVIGATOR – with the onClick fixed (no setExpanded) */}
           <div style={{ display: "flex", gap: 8, marginBottom: 24, overflowX: "auto", paddingBottom: 4, animation: "fadeUp 0.6s ease 0.2s both" }}>
             {STEPS.map((s, i) => (
               <button
                 key={i}
-                onClick={() => { setActiveStep(i) }}
+                onClick={() => setActiveStep(i)}
                 style={{
                   display: "flex", alignItems: "center", gap: 8, flexShrink: 0,
                   padding: "9px 16px", borderRadius: 10, border: "none", cursor: "pointer",
@@ -524,7 +549,7 @@ const PaymentGuide: React.FC = () => {
             ))}
           </div>
 
-          {/* ACTIVE STEP DETAIL */}
+          {/* ACTIVE STEP DETAIL (unchanged, but uses updated providers) */}
           <div key={activeStep} style={{ animation: "fadeUp 0.4s ease both" }}>
             <div style={{
               border: `1px solid ${step.color}30`,
@@ -676,7 +701,6 @@ const PaymentGuide: React.FC = () => {
             <span style={{ color: T.teal }}>ЮKassa Integration Guide</span>
             <span> · April 2026</span>
           </div>
-
         </div>
       </div>
     </>
