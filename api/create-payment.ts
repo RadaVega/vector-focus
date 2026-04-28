@@ -7,7 +7,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   const { amount, orderId } = req.body;
-
   if (!amount || amount <= 0) {
     return res.status(400).json({ error: 'Invalid amount' });
   }
@@ -25,10 +24,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       },
       confirmation: {
         type: 'redirect',
-        return_url: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://vector-focus.vercel.app'}/demo?orderId=${orderId}`,
+        return_url: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://vector-focus.vercel.app'}/demo/result?orderId=${orderId}&paymentId=${payment.id}`,
       },
       description: `Тестовый заказ #${orderId}`,
       capture: true,
+      metadata: { orderId },
     });
 
     res.status(200).json({
