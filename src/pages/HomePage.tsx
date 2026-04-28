@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import {
   ArrowRight, Terminal, Zap, Shield, CreditCard,
   Globe, ChevronRight, Check, Code2, Cpu, BarChart3,
