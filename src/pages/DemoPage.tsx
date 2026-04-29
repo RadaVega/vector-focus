@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Link } from 'react-router-dom';
 
 // Design tokens (same as HomePage)
 const T = {
@@ -191,6 +192,7 @@ const DemoPage: React.FC = () => {
   const [result, setResult] = useState<Scenario['result'] | null>(null);
   const [txnCount, setTxnCount] = useState<number>(3247891);
   const [gateways, setGateways] = useState<Gateway[]>(GATEWAYS);
+  const [showArchitectureModal, setShowArchitectureModal] = useState<boolean>(false);
   const timersRef = useRef<NodeJS.Timeout[]>([]);
   const logContainerRef = useRef<HTMLDivElement>(null);
 
@@ -232,19 +234,16 @@ const DemoPage: React.FC = () => {
     resetSim();
     setSimRunning(true);
     const scenario = SCENARIOS[activeScenario];
-    const logsToAdd = scenario.logs.map(log => ({ ...log })); // shallow copy
+    const logsToAdd = scenario.logs.map(log => ({ ...log }));
 
-    // Schedule each log entry with its delay
     logsToAdd.forEach((log, idx) => {
       const timer = setTimeout(() => {
         setLogs(prev => [...prev, log]);
-        // Determine current step: each log advances step by one (if idx < steps length)
         if (idx < scenario.steps.length) {
           setCurrentStep(idx);
         } else {
           setCurrentStep(scenario.steps.length - 1);
         }
-        // Auto-scroll log container
         if (logContainerRef.current) {
           logContainerRef.current.scrollTop = logContainerRef.current.scrollHeight;
         }
@@ -252,7 +251,6 @@ const DemoPage: React.FC = () => {
       timersRef.current.push(timer);
     });
 
-    // Final result after last log duration + 400ms
     const lastDelay = logsToAdd[logsToAdd.length - 1].d + 400;
     const endTimer = setTimeout(() => {
       setCurrentStep(scenario.steps.length);
@@ -546,7 +544,7 @@ const DemoPage: React.FC = () => {
         </div>
 
         {/* Routing Flow Diagram */}
-        <div className="p-4 rounded-md border border-gray-800 bg-[#0D0F1A] mb-6">
+        <div id="routing-flow" className="p-4 rounded-md border border-gray-800 bg-[#0D0F1A] mb-6">
           <div className="text-xs font-mono text-gray-500 mb-3">Как работает маршрутизатор</div>
           <div className="flex items-center justify-between gap-1 overflow-x-auto pb-2">
             {['Запрос', 'Маршрутизатор VF', 'Выбор шлюза', 'Обработка шлюзом', 'Заказ PAID'].map((label, i) => (
@@ -573,8 +571,20 @@ const DemoPage: React.FC = () => {
           <div className="text-lg font-medium text-white mb-2">Готовы защитить выручку?</div>
           <p className="text-sm text-gray-400 mb-4">Подключите Vector Focus за 15 минут. Тестовая среда всех шлюзов уже настроена.</p>
           <div className="flex flex-wrap gap-3 justify-center mb-4">
-            <button className="px-4 py-2 rounded-md bg-gradient-to-r from-teal-500 to-blue-500 text-white text-sm font-mono hover:opacity-90 transition">Документация → 5 шагов ↗</button>
-            <button className="px-4 py-2 rounded-md bg-[#0D0F1A] border border-gray-700 text-gray-300 text-sm font-mono hover:border-gray-500 transition">Как работает маршрутизация? ↗</button>
+            <Link
+              to="/docs"
+              className="px-4 py-2 rounded-md bg-gradient-to-r from-teal-500 to-blue-500 text-white text-sm font-mono hover:opacity-90 transition inline-flex items-center gap-2"
+            >
+              Документация → 5 шагов
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M7 1l6 6-6 6M1 7h12" stroke="currentColor" strokeWidth="1.5"/></svg>
+            </Link>
+            <button
+              onClick={() => setShowArchitectureModal(true)}
+              className="px-4 py-2 rounded-md bg-[#0D0F1A] border border-gray-700 text-gray-300 text-sm font-mono hover:border-gray-500 transition inline-flex items-center gap-2"
+            >
+              Как работает маршрутизация?
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M1 8h14M9 14l6-6-6-6" stroke="currentColor" strokeWidth="1.5"/></svg>
+            </button>
           </div>
           <div className="flex flex-wrap gap-4 justify-center text-xs text-gray-500">
             <span className="flex items-center gap-1"><span className="w-3 h-3 bg-green-500 rounded-full flex items-center justify-center text-[8px] text-white">✓</span> 14 дней бесплатно</span>
@@ -584,6 +594,54 @@ const DemoPage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Modal: Technical architecture explanation */}
+      {showArchitectureModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+          <div className="max-w-2xl w-full bg-[#0D0F1A] border border-teal-500/30 rounded-2xl shadow-2xl overflow-hidden">
+            <div className="flex justify-between items-center p-4 border-b border-gray-800">
+              <h3 className="text-lg font-mono font-semibold text-teal-400">Архитектура авто-маршрутизации</h3>
+              <button onClick={() => setShowArchitectureModal(false)} className="text-gray-400 hover:text-white">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 6l12 12M18 6L6 18"/></svg>
+              </button>
+            </div>
+            <div className="p-6 space-y-4 text-gray-300 text-sm leading-relaxed">
+              <p><span className="text-teal-400 font-semibold">Vector Focus</span> использует распределённую архитектуру для мгновенного переключения между платёжными шлюзами. Вот как это работает:</p>
+              <div className="space-y-3">
+                <div className="border-l-2 border-teal-500 pl-3">
+                  <span className="font-mono text-teal-400">1. Health Check (активный мониторинг)</span>
+                  <p className="mt-1">Каждый шлюз проверяется каждые 5 секунд по трём метрикам: <strong>латентность</strong> (порог 500 мс), <strong>процент ошибок</strong> (порог 2%) и <strong>доступность API</strong>. При падении метрики ниже порога шлюз помечается как &laquo;unhealthy&raquo;.</p>
+                </div>
+                <div className="border-l-2 border-amber-500 pl-3">
+                  <span className="font-mono text-amber-400">2. Circuit Breaker (предохранитель)</span>
+                  <p className="mt-1">Если шлюз вернул 3 ошибки подряд, он переводится в &laquo;открытое&raquo; состояние. Все последующие запросы автоматически направляются на следующий здоровый шлюз. Через 30 секунд делается одна попытка восстановления &mdash; если успешно, шлюз снова включается в ротацию.</p>
+                </div>
+                <div className="border-l-2 border-blue-500 pl-3">
+                  <span className="font-mono text-blue-400">3. Маршрутизация в реальном времени</span>
+                  <p className="mt-1">При поступлении запроса маршрутизатор мгновенно (за &lt;10 мс) рассчитывает приоритет шлюзов на основе:</p>
+                  <ul className="list-disc list-inside mt-1 ml-2 space-y-1">
+                    <li>комиссии (минимальная – приоритет выше)</li>
+                    <li>текущей нагрузки (используется алгоритм weighted round‑robin)</li>
+                    <li>истории успешных платежей за последние 5 минут</li>
+                  </ul>
+                </div>
+                <div className="border-l-2 border-purple-500 pl-3">
+                  <span className="font-mono text-purple-400">4. Асинхронный fallback</span>
+                  <p className="mt-1">Если платеж не удаётся после первого шлюза, запрос автоматически направляется на второй шлюз без перезапроса от пользователя (идиемпотентность по orderId). В демо вы видели переключение Сбербанк → Т-Банк за 280 мс.</p>
+                </div>
+              </div>
+              <div className="bg-[#131527] p-3 rounded-md border border-gray-800 mt-4">
+                <span className="text-xs font-mono text-gray-400">⏱️ Итоговая задержка переключения:</span>
+                <span className="text-teal-400 font-mono ml-2">~280–450 мс</span>
+                <p className="text-xs text-gray-500 mt-1">Пользователь не замечает сбоя — оплата проходит на втором шлюзе без перезагрузки страницы.</p>
+              </div>
+            </div>
+            <div className="p-4 border-t border-gray-800 text-right">
+              <button onClick={() => setShowArchitectureModal(false)} className="px-4 py-2 bg-teal-500/20 text-teal-400 rounded-md hover:bg-teal-500/30 transition">Закрыть</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
