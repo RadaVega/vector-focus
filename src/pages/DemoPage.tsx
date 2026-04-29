@@ -294,6 +294,21 @@ const DemoPage: React.FC = () => {
         style={{ background: `radial-gradient(circle, ${T.blue}09, transparent 70%)` }} />
 
       <div className="relative z-10 max-w-6xl mx-auto px-4 py-8">
+        {/* ══════════════ NEW NAVBAR WITH HOME BUTTON ══════════════ */}
+        <div className="flex items-center justify-between mb-8 pb-2 border-b border-gray-800">
+          <Link to="/" className="flex items-center gap-2 group">
+            <div className="w-8 h-8 rounded-md bg-teal-500/20 border border-teal-500/40 flex items-center justify-center group-hover:bg-teal-500/30 transition">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-teal-400">
+                <path d="M3 3h18v18H3z M8 8h4v4H8z M12 8h4v4h-4z M8 12h4v4H8z"/>
+              </svg>
+            </div>
+            <span className="text-lg font-bold text-white group-hover:text-teal-400 transition">Vector<span className="text-teal-400">Focus</span></span>
+          </Link>
+          <div className="flex gap-2">
+            <Link to="/docs" className="text-sm text-gray-400 hover:text-teal-400 transition px-3 py-1 rounded-md border border-gray-800 hover:border-teal-500/50">Документация</Link>
+          </div>
+        </div>
+
         {/* Header */}
         <div className="flex flex-wrap justify-between items-start gap-4 mb-6">
           <div>
@@ -636,7 +651,8 @@ const DemoPage: React.FC = () => {
                 <p className="text-xs text-gray-500 mt-1">Пользователь не замечает сбоя — оплата проходит на втором шлюзе без перезагрузки страницы.</p>
               </div>
             </div>
-            <div className="p-4 border-t border-gray-800 text-right">
+            <div className="p-4 border-t border-gray-800 text-right flex gap-3 justify-end">
+              <Link to="/" className="px-4 py-2 bg-gray-800 text-gray-300 rounded-md hover:bg-gray-700 transition">На главную</Link>
               <button onClick={() => setShowArchitectureModal(false)} className="px-4 py-2 bg-teal-500/20 text-teal-400 rounded-md hover:bg-teal-500/30 transition">Закрыть</button>
             </div>
           </div>
